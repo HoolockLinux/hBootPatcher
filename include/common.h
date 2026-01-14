@@ -13,6 +13,12 @@ enum image_type {
     IMAGE_TYPE_STAGE2,
 };
 
+#define patch_flag_signature (1 << 0)
+#define patch_flag_iorvbar   (1 << 1)
+#define patch_flag_recfg     (1 << 2)
+#define patch_flag_aes       (1 << 3)
+
+extern uint32_t patch_flags;
 extern uint64_t iboot_base;
 extern uint8_t *iboot_buf;
 extern size_t iboot_len;

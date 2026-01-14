@@ -2,6 +2,7 @@
 #define _GNU_SOURCE
 #endif
 
+#include <getopt.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -19,6 +20,7 @@
 #include "patches/recfg.h"
 #include "patches/signature.h"
 
+uint32_t patch_flags;
 uint64_t iboot_base;
 uint8_t *iboot_buf;
 size_t iboot_len;
@@ -47,28 +49,32 @@ enum image_type get_image_type(void)
  */
 int patch_ibootstage2(void)
 {
-    iorvbar_patch();
-    aes_patch();
+    if (patch_flags & patch_flag_iorvbar) {
+        iorvbar_patch();
+        if (!did_patch_iorvbar) {
+            printf("iorvbar patch not found!\n");
+            return -1;
+        }
+    }
 
-    if (memmem(iboot_buf, iboot_len, "arm-io/aop", sizeof("arm-io/aop"))) {
+    if (patch_flags & patch_flag_aes) {
+        aes_patch();
+        if (!did_patch_aes) {
+            printf("aes patch not found!\n");
+            return -1;
+        }
+    }
+
+    if ((patch_flags & patch_flag_recfg) &&
+        memmem(iboot_buf, iboot_len, "arm-io/aop", sizeof("arm-io/aop"))) {
         recfg_patch();
 
         if (!did_patch_recfg) {
             printf("recfg patch not found!\n");
             return -1;
         }
-    } else {
+    } else if (patch_flags & patch_flag_recfg) {
         printf("%s: Target does not have recfg, skipping...\n", __func__);
-    }
-
-    if (!did_patch_aes) {
-        printf("aes patch not found!\n");
-        return -1;
-    }
-
-    if (!did_patch_iorvbar) {
-        printf("iorvbar patch not found!\n");
-        return -1;
     }
 
     return 0;
@@ -117,13 +123,15 @@ int patch_iboot(void)
         return -1;
     }
 
-    signature_patch();
+    if (patch_flags & patch_flag_signature) {
+        signature_patch();
 
-    if (!sigcheck_ret) {
-        printf("could not patch signature check\n");
-        return -1;
-    } else {
-        sigcheck_ret[0] = arm64_branch(sigcheck_ret, ret0_gadget, false);
+        if (!sigcheck_ret) {
+            printf("could not patch signature check\n");
+            return -1;
+        } else {
+            sigcheck_ret[0] = arm64_branch(sigcheck_ret, ret0_gadget, false);
+        }
     }
 
     if (get_image_type() == IMAGE_TYPE_STAGE2 && patch_ibootstage2())
@@ -132,16 +140,53 @@ int patch_iboot(void)
     return 0;
 }
 
-int main(int argc, char **argv)
+static int usage(const char *prog_name)
+{
+    fprintf(stderr,
+            "Usage: %s [-airs] <iboot_in> <iboot_out>\n"
+            "\t-a\t\tApply AES patch\n"
+            "\t-i\t\tApply IORVBAR patch\n"
+            "\t-r\t\tApply reconfig patch\n"
+            "\t-s\t\tApply signature patch\n",
+            prog_name);
+
+    return -1;
+}
+
+int main(int argc, char *argv[])
 {
     FILE *fp = NULL;
+    const char *prog_name = argv[0];
+    int opt;
 
-    if (argc < 3) {
-        printf("Usage: %s <input iboot> <patched iboot>\n", argv[0]);
-        return 0;
+    while ((opt = getopt(argc, argv, "airs")) != -1) {
+        switch (opt) {
+            case 'a':
+                patch_flags |= patch_flag_aes;
+                break;
+            case 'i':
+                patch_flags |= patch_flag_iorvbar;
+                break;
+            case 'r':
+                patch_flags |= patch_flag_recfg;
+                break;
+            case 's':
+                patch_flags |= patch_flag_signature;
+                break;
+            case '?':
+            default:
+                return usage(prog_name);
+        }
     }
 
-    fp = fopen(argv[1], "rb");
+    argc -= optind;
+    argv += optind;
+
+    if (argc != 2 || !patch_flags) {
+        return usage(prog_name);
+    }
+
+    fp = fopen(argv[0], "rb");
     if (!fp) {
         printf("Failed to open iboot!\n");
         return -1;
@@ -174,7 +219,7 @@ int main(int argc, char **argv)
         return retval;
     }
 
-    fp = fopen(argv[2], "wb");
+    fp = fopen(argv[1], "wb");
     if (!fp) {
         printf("Failed to open output file!\n");
         free(iboot_buf);
