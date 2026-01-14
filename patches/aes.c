@@ -51,7 +51,11 @@ void aes_patch(void)
     };
 
     uint32_t aes_masks_old[] = {
-        0xffffffff, 0xfc000000, 0xfffffff0, 0xffffffff, 0xfc000000,
+        0xffffffff, //
+        0xfc000000, //
+        0xfffffff0, //
+        0xffffffff, //
+        0xfc000000, //
     };
 
     struct pf_patch_t aes_old =
@@ -67,7 +71,11 @@ void aes_patch(void)
     };
 
     uint32_t aes_masks_new[] = {
-        0xffffffff, 0xfc000000, 0xfffffff0, 0xffffffff, 0xfc000000,
+        0xffffffff, //
+        0xfc000000, //
+        0xfffffff0, //
+        0xffffffff, //
+        0xfc000000, //
     };
 
     struct pf_patch_t aes_new =

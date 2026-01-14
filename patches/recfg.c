@@ -45,7 +45,12 @@ void recfg_patch(void)
     };
 
     uint32_t recfg_old_masks[] = {
-        0xffffffff, 0xfc000000, 0xffffffff, 0xfc000000, 0xffffffff, 0xfc000000,
+        0xffffffff, //
+        0xfc000000, //
+        0xffffffff, //
+        0xfc000000, //
+        0xffffffff, //
+        0xfc000000, //
     };
 
     struct pf_patch_t recfg_old =
@@ -62,7 +67,12 @@ void recfg_patch(void)
     };
 
     uint32_t recfg_new_masks[] = {
-        0xffffffff, 0xfc000000, 0xffffffff, 0xfc000000, 0xffffffff, 0xfc000000,
+        0xffffffff, //
+        0xfc000000, //
+        0xffffffff, //
+        0xfc000000, //
+        0xffffffff, //
+        0xfc000000, //
     };
 
     struct pf_patch_t recfg_new =
