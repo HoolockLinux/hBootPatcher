@@ -22,7 +22,7 @@ bool patch_aes(struct pf_patch_t *patch, uint32_t *stream)
     if (bl1 != bl4)
         return false;
 
-    uint32_t *bl_disable = pf_find_next(stream, 0x10, 0x94000000, 0xfc000000);
+    uint32_t *bl_disable = pf_find_next(stream+6, 0x10, 0x94000000, 0xfc000000);
     if (!bl_disable) {
         printf("%s: Failed to find bl platform_disable_keys\n", __func__);
         return false;
