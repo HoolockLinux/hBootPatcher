@@ -17,11 +17,26 @@ uint32_t *sigcheck_ret;
 /* OK to match multiple times, as long as it's the same ret */
 static bool patch_sigcheck(struct pf_patch_t *patch, uint32_t *stream)
 {
-    uint32_t *retp = pf_find_next(stream, 0x200, ret, 0xffffffff);
+    uint32_t *ldp = pf_find_next(stream, 0x190, 0xa9407bfd, 0xffc07fff); // ldp x29, x30, [sp, ...]
+    if (!ldp) {
+        printf("%s: failed to find image4_validate_property_callback ldp 0x%" PRIx64 "\n", __func__,
+               iboot_ptr_to_pa(stream));
+        return false;
+    }
+
+    uint32_t *retp = pf_find_next(ldp, 10, ret, 0xffffffff);
+    if (!retp) {
+        uint32_t *shared_b = pf_find_next(ldp, 10, 0x14000000, 0xfc000000);
+        if (shared_b) {
+            uint32_t *tail = pf_follow_branch(iboot_buf, shared_b);
+            retp = pf_find_next(tail, 10, ret, 0xffffffff);
+        }
+    }
+
     if (!retp) {
         printf("%s: failed to find image4_validate_property_callback function "
-               "return\n",
-               __func__);
+               "return 0x%" PRIx64 "\n",
+               __func__, iboot_ptr_to_pa(stream));
         return false;
     }
 

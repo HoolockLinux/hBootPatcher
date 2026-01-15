@@ -19,7 +19,7 @@ static bool patch_ret0(struct pf_patch_t *patch, uint32_t *stream)
         return false;
 
     ret0_gadget = stream;
-    printf("%s: Found ret0 gadget\n", __func__);
+    printf("%s: Found ret0 gadget=0x%" PRIx64 "\n", __func__, iboot_ptr_to_pa(ret0_gadget));
     return true;
 }
 
