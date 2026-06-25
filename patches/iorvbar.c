@@ -57,7 +57,7 @@ bool patch_iorvbar_new(struct pf_patch_t *patch, uint32_t *stream)
 void iorvbar_patch(void)
 {
     // https://github.com/palera1n/PongoOS/blob/b1038fd75a2608aa8dbc0dd3c94a0f1f97118c28/src/boot/patches.S#L51
-
+    // /x 00d07592000040b2:e0ffffff00fcffff
     uint32_t iorvbar_old_match[] = {
         0x9275d000, // and xN, x0, 0xfffffffffffff800
         0xb2400000, // orr xM, xN, 1
@@ -72,6 +72,7 @@ void iorvbar_patch(void)
         pf_construct_patch(iorvbar_old_match, iorvbar_old_masks,
                            sizeof(iorvbar_old_masks) / sizeof(uint32_t), (void *)patch_iorvbar_old);
 
+    // /x 00d07592e003012a000000aa:e0ffffffe0ffffff00fce0ff
     uint32_t iorvbar_new_match[] = {
         0x9275d000, // and xN, x0, 0xfffffffffffff800
         0x2a0103e0, // mov wK, w1

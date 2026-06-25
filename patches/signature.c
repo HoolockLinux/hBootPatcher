@@ -54,6 +54,7 @@ static bool patch_sigcheck(struct pf_patch_t *patch, uint32_t *stream)
 void signature_patch(void)
 {
     /* Find where the EKEY key is matched */
+    // /x 20ab885260a9a872
     uint32_t ekey_matches[] = {
         0x5288ab20, // movz w0, #0x4559
         0x72a8a960, // movk w0, #0x454b, lsl 16
@@ -71,6 +72,7 @@ void signature_patch(void)
      * on older clang, this is reversed
      * Additionally on even older iBoots it may not be w0
      */
+    // /x 60a9a85220ab8872:e0ffffffe0ffffff
     uint32_t ekey_matches_old[] = {
         0x52a8a960, // movz wN, #0x454b, lsl 16
         0x7288ab20, // movk wN, #0x4559

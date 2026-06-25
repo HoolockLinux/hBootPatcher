@@ -42,6 +42,7 @@ bool patch_aes(struct pf_patch_t *patch, uint32_t *stream)
 void aes_patch(void)
 {
     // https://github.com/palera1n/PongoOS/blob/b1038fd75a2608aa8dbc0dd3c94a0f1f97118c28/src/boot/patches.S#L162
+    // /x e0030e3200000094f00300aae0030d3200000094:ffffffff000000fcf0ffffffffffffff000000fc
     uint32_t aes_matches_old[] = {
         0x320e03e0, // orr w0, wzr, 0x40000
         0x94000000, // bl security_allow_modes
@@ -62,6 +63,7 @@ void aes_patch(void)
         pf_construct_patch(aes_matches_old, aes_masks_old, sizeof(aes_masks_old) / sizeof(uint32_t),
                            (void *)patch_aes);
 
+    // /x 8000a05200000094f00300aa0001a05200000094:ffffffff000000fcf0ffffffffffffff000000fc
     uint32_t aes_matches_new[] = {
         0x52a00080, // mov w0, 0x40000
         0x94000000, // bl security_allow_modes

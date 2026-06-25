@@ -33,6 +33,7 @@ void recfg_patch(void)
 {
     /*
      * https://github.com/palera1n/PongoOS/blob/b1038fd75a2608aa8dbc0dd3c94a0f1f97118c28/src/boot/patches.S#L299
+     * /x e007003200000094e007003200000094e007003200000094:ffffffff000000fcffffffff000000fcffffffff000000fc
      */
 
     uint32_t recfg_old_matches[] = {
@@ -57,6 +58,7 @@ void recfg_patch(void)
         pf_construct_patch(recfg_old_matches, recfg_old_masks,
                            sizeof(recfg_old_masks) / sizeof(uint32_t), (void *)patch_recfg);
 
+    // /x 600080520000009460008052000000946000805200000094:ffffffff000000fcffffffff000000fcffffffff000000fc
     uint32_t recfg_new_matches[] = {
         0x52800060, // mov w0, #3
         0x94000000, // bl
